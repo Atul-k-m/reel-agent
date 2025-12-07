@@ -1,0 +1,222 @@
+:root {
+    --paper-bg: #fdfbf7;
+    --grid-line: #e1e8ed;
+    --ink-color: #2c3e50;
+    --accent-color: #3498db;
+    --danger-color: #e74c3c;
+    --sketch-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);
+    --border-style: 2px solid #2c3e50;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Iceberg', cursive;
+    background-color: var(--paper-bg);
+    color: var(--ink-color);
+
+    /* Graph Paper Pattern */
+    background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 20px 20px;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 3rem;
+    position: relative;
+}
+
+.header h1 {
+    font-size: 4rem;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.1);
+    transform: rotate(-1deg);
+    background: none;
+    -webkit-text-fill-color: var(--ink-color);
+}
+
+.header p {
+    font-size: 1.2rem;
+    color: var(--accent-color);
+    font-weight: bold;
+    margin-top: 0.5rem;
+    font-family: 'Courier New', monospace;
+    /* Contrast font for subtitle */
+}
+
+/* Input Section - Sketchy Box */
+.input-section {
+    background: #fff;
+    border: var(--border-style);
+    padding: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    box-shadow: var(--sketch-shadow);
+    border-radius: 2px 255px 3px 25px / 255px 5px 225px 2px;
+    /* Hand-drawn shape */
+    transform: rotate(0.5deg);
+}
+
+.main-input {
+    flex: 1;
+    border: none;
+    border-bottom: 2px dashed var(--ink-color);
+    background: transparent;
+    padding: 1rem;
+    font-family: 'Iceberg', cursive;
+    font-size: 1.2rem;
+    color: var(--ink-color);
+    outline: none;
+}
+
+.main-input::placeholder {
+    color: #95a5a6;
+    font-style: italic;
+}
+
+/* Customization Dropdowns */
+.options-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.style-select {
+    padding: 0.5rem;
+    background: transparent;
+    border: 1px solid var(--ink-color);
+    border-radius: 4px;
+    /* Slightly sketchy rounding could be added */
+    font-family: 'Iceberg', cursive;
+    color: var(--ink-color);
+    outline: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.cta-button {
+    background: var(--ink-color);
+    color: #fff;
+    border: none;
+    padding: 0 2rem;
+    font-family: 'Iceberg', cursive;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+}
+
+.cta-button:hover:not(:disabled) {
+    transform: scale(1.05) rotate(-1deg);
+    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+}
+
+.cta-button:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+}
+
+/* Job Cards - Sticky Note / Index Card Style */
+.jobs-list h2 {
+    border-bottom: 3px double var(--ink-color);
+    display: inline-block;
+    padding-bottom: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.job-card {
+    background: #fff;
+    border: var(--border-style);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    box-shadow: var(--sketch-shadow);
+    transition: transform 0.2s;
+    border-radius: 2px;
+}
+
+.job-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Tape effect (pure css decoration) */
+.job-card::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 30px;
+    background-color: rgba(255, 255, 255, 0.4);
+    border-left: 1px dashed rgba(0, 0, 0, 0.1);
+    border-right: 1px dashed rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+}
+
+.job-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--grid-line);
+    padding-bottom: 0.5rem;
+}
+
+.job-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border: 2px solid currentColor;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* Logs Area - Notebook Sidebar Look */
+.logs-container {
+    background: #fdfbf7;
+    border-left: 3px solid #e74c3c;
+    /* Red margin line */
+    padding: 1rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    max-height: 200px;
+    overflow-y: auto;
+    line-height: 1.6;
+
+    background-image: linear-gradient(var(--grid-line) 1px, transparent 1px);
+    background-size: 100% 1.6em;
+    /* Match line-height */
+    background-attachment: local;
+
+    color: #333;
+}
+
+.log-line {
+    position: relative;
+    padding-left: 1rem;
+}
+
+.progress-track {
+    margin-top: 1rem;
+    font-weight: bold;
+}

@@ -1,0 +1,12 @@
+# Generated Media (Large files)
+generated/
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Cursor/Agent
+.gemini/
