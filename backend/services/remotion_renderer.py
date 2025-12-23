@@ -76,12 +76,21 @@ class RemotionRenderer:
         # ----------------------------
         npx_cmd = "npx.cmd" if os.name == "nt" else "npx"
 
+        # Optimization: Use pre-built bundle if available (Docker)
+        bundle_path = os.path.join(self.frontend_dir, "dist-bundle")
+        if os.path.exists(bundle_path) and os.path.isdir(bundle_path):
+            print(f"Using Remotion Bundle: {bundle_path}")
+            entry_point = "dist-bundle"
+        else:
+            print("Using Remotion Source (Runtime Bundling)")
+            entry_point = "src/remotion/index.ts"
+
         cmd = [
             npx_cmd,
             "--yes",
             "remotion",
             "render",
-            "src/remotion/index.ts",
+            entry_point,
             template_id,
             output_path,
             f"--props={props_path}",

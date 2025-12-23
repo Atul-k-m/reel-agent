@@ -27,6 +27,8 @@ RUN npm install
 
 COPY frontend ./
 RUN npm run build
+# Pre-bundle Remotion to save runtime CPU
+RUN npx remotion bundle src/remotion/index.ts dist-bundle
 
 # --- BACKEND SETUP ---
 WORKDIR /app/backend
