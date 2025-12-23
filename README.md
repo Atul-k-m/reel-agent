@@ -6,23 +6,6 @@ ReelAgent is a completely free, open-source, and self-hosted system that archite
 
 The system follows a modular microservice-like architecture (monolith code, modular logic).
 
-```mermaid
-graph TD
-    User[Dashboard Frontend] -->|New Topic| API[FastAPI Backend]
-    API -->|Bg Task| Pipeline[Content Pipeline]
-    
-    subgraph "AI Core (Local/Hybrid)"
-        Pipeline -->|Script| Ollama[Ollama (Llama 3)]
-        Pipeline -->|Voice| TTS[Edge-TTS / Piper]
-        Pipeline -->|Visuals| IMG[Pollinations / Stable Diffusion]
-    end
-    
-    subgraph "Assembly"
-        Pipeline -->|Editing| Remotion[Remotion (React Video)]
-        Remotion -->|Render| Chromium[Chromium Headless]
-        Chromium -->|Result| Storage[./generated]
-    end
-```
 
 ## 🛠 Tech Stack
 
