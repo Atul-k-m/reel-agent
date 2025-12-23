@@ -4,13 +4,56 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 import uvicorn
 import os
+import sys
 import asyncio
 from datetime import datetime, timedelta
 import shutil
+import traceback
 
 # Windows subprocess fix
 if os.name == "nt":
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+
+
+# ======================================================
+# PRODUCTION LOGGING UTILITIES
+# ======================================================
+def get_system_info() -> dict:
+    """Get system resource info for debugging production issues"""
+    import platform
+    info = {
+        "cpu_count": os.cpu_count(),
+        "platform": platform.system(),
+        "python": sys.version.split()[0],
+        "env": "PRODUCTION" if os.environ.get("PORT") else "LOCAL",
+    }
+    
+    # Try to get memory info (requires psutil, graceful fallback)
+    try:
+        import psutil
+        mem = psutil.virtual_memory()
+        info["memory_available_mb"] = mem.available // (1024 * 1024)
+        info["memory_total_mb"] = mem.total // (1024 * 1024)
+        info["memory_percent"] = mem.percent
+    except ImportError:
+        info["memory"] = "psutil not installed"
+    except Exception as e:
+        info["memory"] = f"error: {e}"
+    
+    return info
+
+
+def log_system_info(job_id: str):
+    """Log system info to job logs for debugging"""
+    info = get_system_info()
+    JobDB.add_log(job_id, f"[SYS] Environment: {info['env']}")
+    JobDB.add_log(job_id, f"[SYS] CPUs: {info['cpu_count']}, Platform: {info['platform']}")
+    
+    if "memory_available_mb" in info:
+        JobDB.add_log(job_id, f"[SYS] Memory: {info['memory_available_mb']}MB free / {info['memory_total_mb']}MB total ({info['memory_percent']}% used)")
+    else:
+        JobDB.add_log(job_id, f"[SYS] Memory: {info.get('memory', 'unavailable')}")
+
 
 async def cleanup_old_jobs():
     """Cronjob: Deletes generated folders older than 24 hours"""
@@ -85,9 +128,16 @@ app.mount(
 # BACKGROUND PIPELINE
 # ======================================================
 async def process_job(job_id: str):
+    """Main job processing pipeline with comprehensive error handling"""
     job = JobDB.get(job_id)
     if not job:
         return
+
+    # Log system info at job start (critical for debugging production)
+    try:
+        log_system_info(job_id)
+    except Exception as e:
+        JobDB.add_log(job_id, f"[SYS] Error getting system info: {e}")
 
     # ==================================================
     # 1. SCRIPT
@@ -211,31 +261,51 @@ async def process_job(job_id: str):
         template_id = job.image_style.split(":")[-1].strip()
         output_video = os.path.join(job_dir, "final_typographic.mp4")
 
+        JobDB.add_log(job_id, f"Starting Remotion render (template: {template_id})...")
+        
         renderer = RemotionRenderer(frontend_dir="../frontend")
 
-        result = await renderer.render_video(
-            template_id=template_id,
-            output_path=output_video,
-            audio_path=audio_path,
-            text=full_script,
-            duration_in_frames=total_frames,
-            scenes=scenes_payload,
-        )
+        try:
+            result = await renderer.render_video(
+                template_id=template_id,
+                output_path=output_video,
+                audio_path=audio_path,
+                text=full_script,
+                duration_in_frames=total_frames,
+                scenes=scenes_payload,
+            )
+        except Exception as e:
+            error_msg = f"Remotion render crashed: {type(e).__name__}: {str(e)}"
+            JobDB.add_log(job_id, f"ERROR: {error_msg}")
+            JobDB.add_log(job_id, f"TRACEBACK: {traceback.format_exc()[-500:]}")
+            JobDB.update(job_id, status=TaskStatus.FAILED, error_msg=error_msg)
+            return
 
-        if not result:
+        # Handle the new error return format
+        if result is None:
+            error_msg = "Remotion returned None (unknown failure)"
+            JobDB.add_log(job_id, f"ERROR: {error_msg}")
+            JobDB.update(job_id, status=TaskStatus.FAILED, error_msg=error_msg)
+            return
+            
+        if isinstance(result, dict) and "error" in result:
+            error_msg = result["error"]
+            # Truncate for storage but log full
+            JobDB.add_log(job_id, f"ERROR: Remotion failed: {error_msg[:500]}")
             JobDB.update(
                 job_id,
                 status=TaskStatus.FAILED,
-                error_msg="Remotion render failed",
+                error_msg=error_msg[:200],  # Truncate for DB
             )
             return
 
+        # Success!
         JobDB.update(
             job_id,
             status=TaskStatus.FINISHED,
             video_path=result,
         )
-        JobDB.add_log(job_id, "Typographic video ready")
+        JobDB.add_log(job_id, "✓ Typographic video ready")
         return
 
     # ==================================================

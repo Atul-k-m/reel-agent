@@ -1,41 +1,41 @@
 FROM python:3.10-slim
 
-# Install System Deps for Remotion (Chromium, FFmpeg, Node.js)
+# 1. System Dependencies (Cached Layer)
+# Installed once and cached.
 RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg \
-    ffmpeg \
-    curl \
-    chromium \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Node.js 18
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    wget gnupg ffmpeg curl chromium \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Environment for Remotion to use installed Chromium
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-
 WORKDIR /app
 
-# --- FRONTEND BUILD ---
-WORKDIR /app/frontend
-COPY frontend/package*.json ./
-RUN npm install
+# 2. Dependency Installation (Cached Layer)
+# We copy ONLY the dependency files first.
+# This ensures that these layers are reused unless requirements/package.json changes.
+COPY backend/requirements.txt ./backend/
+COPY frontend/package*.json ./frontend/
 
-COPY frontend ./
-RUN npm run build
-# Pre-bundle Remotion to save runtime CPU
-RUN npx remotion bundle src/remotion/index.ts dist-bundle
-
-# --- BACKEND SETUP ---
+# Install Backend Deps
 WORKDIR /app/backend
-COPY backend/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install Frontend Deps
+WORKDIR /app/frontend
+RUN npm install
+
+# 3. Source Code & Build (Invalidates when source changes)
+# Copy Frontend source and build
+COPY frontend ./
+RUN npm run build
+RUN npx remotion bundle src/remotion/index.ts dist-bundle
+
+# Copy Backend source (Last layer for fastest iteration on Python code)
+WORKDIR /app/backend
 COPY backend ./
 
-# --- RUN ---
+# 4. Runtime
 CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
