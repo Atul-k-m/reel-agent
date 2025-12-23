@@ -15,9 +15,18 @@ class TaskStatus(str, Enum):
     FINISHED = "FINISHED"
     FAILED = "FAILED"
 
+class DurationMode(str, Enum):
+    """Video duration options"""
+    AUTO = "auto"           # Based on script narration length
+    QUICK = "quick_15s"     # ~15 seconds
+    SHORT = "short_30s"     # ~30 seconds
+    MEDIUM = "medium_60s"   # ~60 seconds
+    LONG = "long_90s"       # ~90 seconds
+
 class Scene(BaseModel):
     narration: str
     visual_prompt: str
+    visual_text: Optional[str] = None
     estimated_duration: float = 5.0
     image_path: Optional[str] = None
     audio_path: Optional[str] = None
@@ -27,6 +36,7 @@ class JobCreate(BaseModel):
     tone: str = "Futuristic, Curious"
     scene_count: int = 4
     image_style: str = "Cinematic"
+    duration_mode: DurationMode = DurationMode.AUTO  # Default: based on script
 
 class Job(BaseModel):
     id: str
@@ -36,6 +46,7 @@ class Job(BaseModel):
     # New fields
     scene_count: int = 4
     image_style: str = "Cinematic"
+    duration_mode: DurationMode = DurationMode.AUTO
     
     script: Optional[List[Scene]] = None
     caption: Optional[str] = None
@@ -61,6 +72,7 @@ class JobDB:
             created_at=datetime.now(),
             scene_count=job_req.scene_count,
             image_style=job_req.image_style,
+            duration_mode=job_req.duration_mode,
             logs=["Job created."]
         )
         JobDB.jobs[job_id] = job

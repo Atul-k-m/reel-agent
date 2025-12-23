@@ -6,12 +6,18 @@
     "scripts": {
         "dev": "vite",
         "build": "vite build",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "remotion": "remotion studio src/remotion/index.ts",
+        "render": "remotion render src/remotion/index.ts"
     },
     "dependencies": {
+        "@remotion/cli": "^4.0.394",
+        "@remotion/shapes": "^4.0.394",
+        "@remotion/zod-types": "^4.0.394",
         "axios": "^1.6.0",
         "react": "^18.2.0",
-        "react-dom": "^18.2.0"
+        "react-dom": "^18.2.0",
+        "remotion": "^4.0.394"
     },
     "devDependencies": {
         "@types/react": "^18.2.0",

@@ -11,6 +11,17 @@ class Settings(BaseSettings):
     # Models
     OLLAMA_MODEL: str = "llama3"
     OLLAMA_HOST: str = "http://localhost:11434"
+
+    # Optional Free/Freemium APIs (Set in .env)
+    GEMINI_API_KEY: str = ""
+    GROQ_API_KEY: str = ""
+    HF_TOKEN: str = ""
+    
+    # New Image Providers (Optional)
+    REPLICATE_API_TOKEN: str = ""
+    GETIMG_API_KEY: str = ""
+    SEGMIND_API_KEY: str = ""
+    DEEPAI_API_KEY: str = ""
     
     # Instagram (Optional for local dev)
     IG_ACCESS_TOKEN: str = ""

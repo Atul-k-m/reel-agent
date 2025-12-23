@@ -9,8 +9,4 @@ backend/__pycache__/
 backend/venv/
 backend/.env
 backend/generated/
-generated/
-.idea/
-.vscode/
-backend/piper_models/
-*.onnx
+.git/
