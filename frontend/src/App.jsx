@@ -81,6 +81,9 @@ const StyleThumbnail = ({ name }) => {
 // ... existing App component code ...
 
 function App() {
+    // Dynamic API Base: Localhost for Dev, Relative for Prod (Render)
+    const API_BASE = import.meta.env.DEV ? "http://localhost:8000" : "";
+
     const [topic, setTopic] = useState("");
     const [sceneCount, setSceneCount] = useState(4);
     const [imageStyle, setImageStyle] = useState("Typographic: Bauhaus");
@@ -98,7 +101,7 @@ function App() {
 
     const fetchJobs = async () => {
         try {
-            const res = await fetch("http://localhost:8000/jobs");
+            const res = await fetch(`${API_BASE}/jobs`);
             const data = await res.json();
             setJobs(data.reverse());
         } catch (error) {
@@ -110,7 +113,7 @@ function App() {
         if (!topic) return;
         setLoading(true);
         try {
-            await fetch("http://localhost:8000/jobs", {
+            await fetch(`${API_BASE}/jobs`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -133,7 +136,7 @@ function App() {
         const normalized = path.replace(/\\/g, '/');
         const parts = normalized.split('/generated/');
         if (parts.length > 1) {
-            return `http://localhost:8000/generated/${parts[1]}`;
+            return `${API_BASE}/generated/${parts[1]}`;
         }
         return "";
     };
