@@ -16,3 +16,4 @@ transformers
 accelerate
 torch
 pydantic-settings
+gTTS
